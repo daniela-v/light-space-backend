@@ -31,7 +31,7 @@ Each company defines a workflow consisting of ordered rules. When an invoice is 
 ---
 
 ### Layers
-
+```
 ├── application — Orchestrates invoice processing.
 ├── domain — Core business models and logic.
 │ ├── model — Entities representing Workflow, Rule, Condition, Action, Invoice, Approver, etc.
@@ -40,7 +40,7 @@ Each company defines a workflow consisting of ordered rules. When an invoice is 
 ├── infrastructure — External system integration (Slack, Email) - we don't use any clients here, but I separated it as if we were.
 ├── interfaces — User-facing entry points (CLI in this case). Only exists for this reason.
 └── resources — Configuration, database initialization, and diagrams. 
-
+```
 ## Assumptions
 
 While designing and implementing the solution, the following assumptions were made:

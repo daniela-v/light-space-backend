@@ -17,7 +17,7 @@ public class InvoiceValidator {
             throw new RuntimeException("Invoice must have a UUID id");
         }
 
-        if (invoice.getMoney().getAmount() == null || invoice.getMoney().getAmount().compareTo(BigDecimal.ZERO) < 0) {
+        if (invoice.getMoney().getAmount() == null || invoice.getMoney().getAmount().signum() < 0) {
             throw new RuntimeException("Invoice amount must be non-null and >= 0");
         }
 
