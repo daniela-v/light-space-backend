@@ -123,6 +123,11 @@ mvn clean package
 java -jar target/invoice-approval-1.0.0.jar
 ```
 
+If you want to run tests
+```bash
+mvn test
+```
+
 ## Creating a Workflow 
 When adding a new workflow for the company, the old one is updated to inactive. A company only has 1 active workflow at a time.
 
