@@ -12,7 +12,34 @@
 This project implements a configurable **invoice approval workflow engine**.  
 Each company defines a workflow consisting of ordered rules. When an invoice is created, it is evaluated against the active workflow, and approval requests are generated accordingly.
 
+
+### **High-level Flow**
+
+1. **Invoice creation**
+    - Triggered via CLI (`InvoiceApprovalRunner`). This entry point mimics an event-based trigger.
+    - CLI collects invoice details (amount, department, manager approval) and submits to `WorkflowService`.
+
+2. **Workflow retrieval & evaluation**
+    - `WorkflowService` fetches the **active workflow**.
+    - `WorkflowEngine` evaluates all rules sequentially (`stepOrder`) against the invoice.
+
+3. **Action execution**
+    - We support only one action type, therefore only `ApprovalRequest` entities are created.
+    - Notifications are submitted asynchronously using the `NotificationSender` interface (Slack/Email).
+    - Duplicate or already processed approval requests are skipped (idempotent behavior).
+
 ---
+
+### Layers
+
+├── application — Orchestrates invoice processing.
+├── domain — Core business models and logic.
+│ ├── model — Entities representing Workflow, Rule, Condition, Action, Invoice, Approver, etc.
+│ ├── repository — JPA repositories for database access.
+│ └── service — Domain services such as ConditionEvaluator and WorkflowEngine - domain logic, no I/O operations etc. Focused on business rules and calculations, without caring about how they’re triggered or persisted.
+├── infrastructure — External system integration (Slack, Email) - we don't use any clients here, but I separated it as if we were.
+├── interfaces — User-facing entry points (CLI in this case). Only exists for this reason.
+└── resources — Configuration, database initialization, and diagrams. 
 
 ## Assumptions
 
@@ -26,7 +53,8 @@ While designing and implementing the solution, the following assumptions were ma
 
 ## Additional Assumptions
 
-1. The system is operated via a **CLI**. In a production environment, this would ideally be exposed via **API endpoints**. 
+1. We use H2 in memory db for clarity. Managing everything in memory created too much code.
+2. The system is operated via a **CLI**. In a production environment, this would ideally be exposed via **API endpoints**. 
 If we had APIs and an interface, we can control and provide options/configs to the UI for the company to edit.
 2. Invoice creation via CLI mimics an Invoice Received event.  
    In production, this would be triggered by a real event and act as the workflow trigger.
@@ -95,8 +123,10 @@ mvn clean package
 java -jar target/invoice-approval-1.0.0.jar
 ```
 
-Creating a Workflow (When adding a new workflow for the company, the old one is updated to inactive). 
-A company only has 1 active workflow at a time.
+## Creating a Workflow 
+When adding a new workflow for the company, the old one is updated to inactive. A company only has 1 active workflow at a time.
+
+Supported Operations
 
 | Field                     | Type       | Supported Operators            |
 | ------------------------- | ---------- | ------------------------------ |
@@ -104,8 +134,6 @@ A company only has 1 active workflow at a time.
 | `department`              | String     | EQ, NEQ                        |
 | `requiresManagerApproval` | Boolean    | EQ, NEQ (`"true"` / `"false"`) |
 
-
-Supported Operations
 
 | Operator | Meaning |
 | -------- | ------- |
