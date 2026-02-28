@@ -56,31 +56,31 @@ While designing and implementing the solution, the following assumptions were ma
 1. We use H2 in memory db for clarity. Managing everything in memory created too much code.
 2. The system is operated via a **CLI**. In a production environment, this would ideally be exposed via **API endpoints**. 
 If we had APIs and an interface, we can control and provide options/configs to the UI for the company to edit.
-2. Invoice creation via CLI mimics an Invoice Received event.  
+3. Invoice creation via CLI mimics an Invoice Received event.  
    In production, this would be triggered by a real event and act as the workflow trigger.
-3. No external workflow engine is used.  
+4. No external workflow engine is used.  
    In a production system, existing solutions for workflow engines could be considered - **eg Temporal, Flowable, Cadence, AWS Step Functions**.
-4. Notifications are sent **asynchronously** to decouple them from the `ApprovalRequest` lifecycle.  
+5. Notifications are sent **asynchronously** to decouple them from the `ApprovalRequest` lifecycle.  
    In a real application:
     - A client would receive and deliver the notification.
     - The client would return a response.
     - Batch processing or scheduled jobs could be used to notify approvers for multiple pending invoices.
-5. Processing the same invoice ID multiple times does **not** resend notifications.  
+6. Processing the same invoice ID multiple times does **not** resend notifications.  
    The processor is **idempotent**.
-6. Updating a workflow:
+7. Updating a workflow:
     - Creates a new workflow version.
     - Sets the previous version to **inactive**.
     - Requires submitting the **entire workflow configuration** (hence full JSON input in CLI).
     - Previously processed invoices remain linked to the workflow version that processed them.
     - If a workflow is updated while an invoice is being processed, processing completes using the workflow version it started with (no read/write locks are applied).
-7. Rule Conditions only evaluate invoice attributes and static configuration, they are "pure" without side effects.
-8. Approval Request are open to supporting a lifecycle. This model allows us to implement new features easily - approval process, batch processing (maybe for new notifications).
-9. Failures in notification delivery do not fail workflow execution.
-10. The CLI is a small orchestration layer, not a business layer. All the business logic lives in application services that can later be reused by APIs, workers, or event consumers.
-11. Future improvement for scaling is caching the workflow (rules and actions for the company). This is easy, since we have decoupled it. 
+8. Rule Conditions only evaluate invoice attributes and static configuration, they are "pure" without side effects.
+9. Approval Request are open to supporting a lifecycle. This model allows us to implement new features easily - approval process, batch processing (maybe for new notifications).
+10. Failures in notification delivery do not fail workflow execution.
+11. The CLI is a small orchestration layer, not a business layer. All the business logic lives in application services that can later be reused by APIs, workers, or event consumers.
+12. Future improvement for scaling is caching the workflow (rules and actions for the company). This is easy, since we have decoupled it. 
 For example, other engines, like in AWS Step Functions - definitions are stored in DB, loaded into memory and cached. And in Temporal, the workflow definitions are versioned and cached in workers.
-12. We should introduce an index on companyId and status active for the workflow - I didn't add it, since I am using in memory h2 db.
-
+13. We should introduce an index on companyId and status active for the workflow - I didn't add it, since I am using in memory h2 db.
+14. Only basic integration tests are added. In production, everything should be tested, edge cases, happy and unhappy paths.
 ---
 
 ## Database Schema / Model
