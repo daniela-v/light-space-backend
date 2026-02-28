@@ -19,7 +19,7 @@ public class InvoiceProcessingService {
 
     private final ApprovalRequestRepository approvalRequestRepository;
 
-    private final List<NotificationSender> notificationSenders;
+    final List<NotificationSender> notificationSenders;
     private final ExecutorService notificationExecutor = Executors.newFixedThreadPool(2);
 
     public InvoiceProcessingService(ApprovalRequestRepository approvalRequestRepository, List<NotificationSender> notificationSenders) {

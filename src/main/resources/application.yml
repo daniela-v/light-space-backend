@@ -28,3 +28,7 @@ logging:
     com.light.approval: INFO
   pattern:
     console: "%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"
+
+app:
+  cli:
+    enabled: true
